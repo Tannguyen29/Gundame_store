@@ -3,6 +3,7 @@ var app = express()
 
 app.set('view engine','hbs')
 app.use(express.urlencoded({extended:true}))
+app.use(express.static('public'))
 
 var url = 'mongodb://127.0.0.1:27017';
 var MongoClient = require('mongodb').MongoClient;
@@ -14,7 +15,7 @@ app.post('/edit',async (req,res)=>{
     const id = req.body.id
 
     let client = await MongoClient.connect(url)
-    let dbo = client.db("GCH1005")
+    let dbo = client.db("GundamStore")
     var ObjectId = require('mongodb').ObjectId
     const condition = {"_id" : new ObjectId(id)};
     const newValues = {$set : {name:name,price:price,picURL:picURL}}
@@ -25,7 +26,7 @@ app.post('/edit',async (req,res)=>{
 app.get('/edit/:id', async(req,res)=>{
     const id = req.params.id
     let client = await MongoClient.connect(url)
-    let dbo = client.db("GCH1005")
+    let dbo = client.db("GundamStore")
     var ObjectId = require('mongodb').ObjectId
     let condition = {"_id" : new ObjectId(id)};
     const prod = await dbo.collection("products").findOne(condition)
@@ -48,7 +49,7 @@ app.post('/add',async (req,res)=>{
         'picURL':picURL
     }
     let client = await MongoClient.connect(url)
-    let dbo = client.db("GCH1005")
+    let dbo = client.db("GundamStore")
     await dbo.collection("products").insertOne(newProduct)
     res.redirect("/")
 
@@ -60,7 +61,7 @@ app.get('/add',(req,res)=>{
 app.get('/delete/:id',async (req,res)=>{
     const id = req.params.id
     let client = await MongoClient.connect(url)
-    let dbo = client.db("GCH1005")
+    let dbo = client.db("GundamStore")
     var ObjectId = require('mongodb').ObjectId
     let condition = {"_id" : new ObjectId(id)};
     await dbo.collection("products").deleteOne(condition)
@@ -69,9 +70,17 @@ app.get('/delete/:id',async (req,res)=>{
 
 app.get('/',async (req,res)=>{
     let client = await MongoClient.connect(url)
-    let dbo = client.db("GCH1005")
+    let dbo = client.db("GundamStore")
     let products = await dbo.collection("products").find().toArray()
-    res.render('main',{'products':products})
+    res.render('index',{'products':products})
+})
+
+app.get('/about', (req, res) => {
+    res.render('about')
+})
+
+app.get('/contact', (req, res) => {
+    res.render('contact')
 })
 
 const PORT = process.env.PORT || 8000
